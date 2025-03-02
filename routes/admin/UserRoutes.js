@@ -1,11 +1,11 @@
 const { Router } = require('express');
 const User = require('../../conf/database/models/User');
-const {getAllUsers, createUser} = require('../../controllers/UserController');
+const {signInUser, createUser} = require('../../controllers/UserController');
 
 const app = Router();
 
 // Define your routes here
-app.post('/', getAllUsers);
+app.post('/signin', signInUser);
 
 app.post('/create', async (req, res) => {
   try {

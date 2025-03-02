@@ -1,33 +1,38 @@
 
 const User = require('../conf/database/models/User');
 const bcrypt = require('bcryptjs');
+const { generateAuthToken } = require('../utils/jwt');
 
-const { generateAuthToken } = require('../utils/auth'); // Importar el helper
 
-exports.getAllUsers = async (req, res) => {
+exports.signInUser = async (req, res) => {
   try {
 
-    const { user, password } = req.body;
+    const { user, passwd } = req.body;
     // Validación básica
-    if (!user || !password) {
+    if (!user || !passwd) {
       return res.status(400).json({ message: "Usuario y contraseña son requeridos" });
     }
 
 
-    const users = await User.find();
+    const users = await User.findOne({user});
 
     if (!users) {
       return res.status(401).send('Invalid credentials');
+    } 
+        
+    if (await bcrypt.compare(users.password, passwd)) {
+      return res.status(401).send('Invalid credentials');
+      
     }
+    // Eliminar el campo password de cada usuario
 
-    // Eliminar la contraseña de la respuesta
-    const userData = foundUser.toObject();
-    delete userData.password;
+    const userWithoutPassword = users.toObject();
+    delete userWithoutPassword.password;
 
     // Generar token de autenticación (opcional, usando JWT)
-    const token = generateAuthToken(foundUser._id); // Implementa esta función
+    const token = generateAuthToken(users._id); // Generar token de autenticación
 
-    res.status(200).json({ message: "Inicio de sesión exitoso", user: userData, token });
+    res.status(200).json({ message: "Inicio de sesión exitoso", user: userWithoutPassword, token });
 
   } catch (error) {
     console.log(error);
