@@ -9,8 +9,8 @@ app.use(express.json());
 
 
 
-app.use('/admin/tournament', require('../routes/admin/tournament/TournamentRoutes'))
-app.use('/admin', require('../routes/admin/userRoutes'))
+app.use('/tournament', require('../Tournament/Routes/TournamentRoutes'))
+app.use('/admin', require('../Admin/Routes/AdminRoutes'))
 app.get('/', (req, res) => res.send('Hello World!'))
 
 

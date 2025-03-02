@@ -1,8 +1,11 @@
 const { Router } = require("express");
 const app = Router();
 
+const authMiddleware = require('../../app/middleware/AuthMiddleware');
+
+app.use(authMiddleware);
 // Define your routes here
-app.get('/ ', (req, res) => {
+app.get('/', (req, res) => {
     res.send('Admin Dashboard');
 });
 

@@ -1,5 +1,5 @@
 
-const User = require('../conf/database/models/User');
+const Admin = require('../Model/Admin');
 const bcrypt = require('bcryptjs');
 const { generateAuthToken } = require('../utils/jwt');
 
@@ -14,13 +14,15 @@ exports.signInUser = async (req, res) => {
     }
 
 
-    const users = await User.findOne({user});
+    const users = await Admin.findOne({user});
 
     if (!users) {
       return res.status(401).send('Invalid credentials');
     } 
-        
-    if (await bcrypt.compare(users.password, passwd)) {
+     
+    let isMatch = await bcrypt.compare(passwd, users.password);
+
+    if (!isMatch) {
       return res.status(401).send('Invalid credentials');
       
     }
