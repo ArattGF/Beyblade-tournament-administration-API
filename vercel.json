@@ -13,10 +13,10 @@
     }
   ],
   "env": {
-    "MONGODB_URI": "@MONGODB_URI",
-    "MONGODB_DB": "@MONGODB_DB",
-    "PORT": "@PORT",
-    "JWT_SECRET": "@JWT_SECRET",
-    "JWT_EXPIRES_IN" : "@JWT_EXPIRES_IN"
+    "MONGODB_URI": "$MONGODB_URI",
+    "MONGODB_DB": "$MONGODB_DB",
+    "PORT": "$PORT",
+    "JWT_SECRET": "$JWT_SECRET",
+    "JWT_EXPIRES_IN" : "$JWT_EXPIRES_IN"
   }
 }
