@@ -2,7 +2,8 @@ const Group = require('../Model/Group');
 const Tournament = require('../../Tournament/Model/Tournament');
 const Participant= require('../../Participant/Model/Participant');
 
-const getAlphabeticArray = require('../utils/alphabeticNumeration');
+const getAlphabeticArray = require('../utils/AlphabeticNumeration');
+
 const GetAllGroups = async (req, res) => {
   try {
     // 1. Buscar el torneo activo
