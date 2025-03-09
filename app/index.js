@@ -25,15 +25,14 @@ app.use('/admin', require('../Admin/Routes/AdminRoutes'))
 app.get('/',AuthMiddleware ,(req, res) => res.send('Hello World!'))
 
 
-mongoose.connect(process.env.MONGODB_URI).then  (() => {
-console.log('Connected to mongoDB')
-
-  const PORT = process.env.PORT || 3001;
-
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('Connected to mongoDB');
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.log('Error connecting to mongoDB:', error);
   });
-
-}).catch((error) => {
-  console.log('Error connecting to mongoDB:', error);
-})
