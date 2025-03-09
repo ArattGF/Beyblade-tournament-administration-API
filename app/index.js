@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: '*'//['http://localhost:4200', 'https://hidrobladers.vercel.app']
+  origin: ['http://localhost:4200', 'https://hidrobladers.vercel.app']
 }));
 app.use(express.json()); 
 
