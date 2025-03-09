@@ -7,7 +7,9 @@ const AuthMiddleware = require('./middleware/AuthMiddleware')
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:4200', 'https://hidrobladers.vercel.app']
+}));
 app.use(express.json()); 
 
 

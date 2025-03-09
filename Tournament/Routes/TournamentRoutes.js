@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const app = Router();
 
+const TournamentController = require('../Controller/TournamentController');
 const authMiddleware = require('../../app/middleware/AuthMiddleware');
 
 app.use(authMiddleware);
@@ -9,10 +10,7 @@ app.get('/', (req, res) => {
     res.send('Admin Dashboard');
 });
 
-app.post('/create', (req, res) => {
-    // Logic to create a new resource
-    res.send('Resource created');
-});
+app.post('/create', TournamentController.createTournament);
 
 app.put('/update/:id', (req, res) => {
     // Logic to update a resource

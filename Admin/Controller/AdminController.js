@@ -8,8 +8,10 @@ exports.signInUser = async (req, res) => {
   try {
 
     const { user, passwd } = req.body;
+
     // Validación básica
     if (!user || !passwd) {
+      
       return res.status(400).json({ message: "Usuario y contraseña son requeridos" });
     }
 
@@ -34,7 +36,7 @@ exports.signInUser = async (req, res) => {
     // Generar token de autenticación (opcional, usando JWT)
     const token = generateAuthToken(users._id); // Generar token de autenticación
 
-    res.status(200).json({ message: "Inicio de sesión exitoso", user: userWithoutPassword, token });
+    res.status(200).json({ ok: true, message: "Inicio de sesión exitoso", user: userWithoutPassword, token });
 
   } catch (error) {
     console.log(error);
