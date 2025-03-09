@@ -8,12 +8,14 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:4200', 'https://hidrobladers.vercel.app']
+  origin: '*'//['http://localhost:4200', 'https://hidrobladers.vercel.app']
 }));
 app.use(express.json()); 
 
 
 app.use('/tournament', require('../Tournament/Routes/TournamentRoutes'))
+app.use('/group', require('../Group/Routes/GroupRoutes'))
+app.use('/participant', require('../Participant/Routes/ParticipantRoutes'))
 app.use('/admin', require('../Admin/Routes/AdminRoutes'))
 app.get('/',AuthMiddleware ,(req, res) => res.send('Hello World!'))
 

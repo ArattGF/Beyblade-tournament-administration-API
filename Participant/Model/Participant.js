@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const participantSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -18,7 +20,7 @@ const participantSchema = new mongoose.Schema({
   },
   victories: {
     type: Number,
-    default: 0
+    default: 0 
   },
   groupPoints: {
     type: Number,
@@ -39,5 +41,7 @@ const participantSchema = new mongoose.Schema({
 participantSchema.virtual('totalPoints').get(function() {
   return this.groupPoints + this.elimPoints;
 });
+
+participantSchema.index({name: 1}, {unique: true});
 
 module.exports = mongoose.model('Participant', participantSchema);

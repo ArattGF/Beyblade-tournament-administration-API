@@ -20,7 +20,7 @@ const tournamentSchema = new mongoose.Schema({
   },
   groups: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Group'
+    ref: 'groups'
   }],
   finalsBracket:  {
     rounds: [{

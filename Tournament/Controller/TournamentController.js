@@ -1,6 +1,6 @@
 const Tournament = require('../Model/Tournament');
 
-const createTournament = async (req, res) => {
+const CreateTournament = async (req, res) => {
   try {
     const { name, numberOfGroups, maxParticipantsPerGroup } = req.body;
 
@@ -9,7 +9,7 @@ const createTournament = async (req, res) => {
       numberOfGroups,
       maxParticipantsPerGroup
     });
-
+ 
     const existingTournament = await Tournament.findOne({ status: { $ne: 'completed' } });
     if (existingTournament) {
       return res.status(409).send('Ya existe un torneo en curso');
@@ -23,6 +23,27 @@ const createTournament = async (req, res) => {
   }
 };
 
+const GetCurrentTournament = async (req, res) => {
+  try{
+
+    const existingTournament = await Tournament.findOne({ status: { $ne: 'completed' } });
+    
+    if (!existingTournament) {
+      return res.status(204).send({ok: true, message: 'No hay torneos en curso', tournamentID: null});
+    }
+    res.status(200).send({ok: true, message: 'Torneo encontrado, redireccionando...', existingTournament});
+    
+  }catch(error){
+    console.error(error);
+    res.status(500).send('Error al obtener el torneo');
+  }
+
+};
+
+
+
+
 module.exports = {
-  createTournament
+  createTournament: CreateTournament,
+  getCurrentTournament:  GetCurrentTournament
 };

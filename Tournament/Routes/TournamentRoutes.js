@@ -5,11 +5,9 @@ const TournamentController = require('../Controller/TournamentController');
 const authMiddleware = require('../../app/middleware/AuthMiddleware');
 
 app.use(authMiddleware);
-// Define your routes here
-app.get('/', (req, res) => {
-    res.send('Admin Dashboard');
-});
 
+app.get('/', TournamentController.getCurrentTournament );
+ 
 app.post('/create', TournamentController.createTournament);
 
 app.put('/update/:id', (req, res) => {
