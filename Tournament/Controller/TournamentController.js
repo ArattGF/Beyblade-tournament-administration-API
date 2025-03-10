@@ -31,7 +31,7 @@ const GetCurrentTournament = async (req, res) => {
     if (!existingTournament) {
       return res.status(204).send({ok: true, message: 'No hay torneos en curso', tournamentID: null});
     }
-    res.status(200).send({ok: true, message: 'Torneo encontrado, redireccionando...', existingTournament});
+    res.status(200).send({ok: true, message: 'Torneo encontrado, redireccionando...', tournament: existingTournament});
     
   }catch(error){
     console.error(error);
