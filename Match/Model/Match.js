@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+
+
 const setSchema = new mongoose.Schema({
   player1Points: Number,
   player2Points: Number,
@@ -17,11 +20,18 @@ const matchSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Group'
   },
-  participants: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Participant',
-    validate: [val => val.length === 2, 'Requiere 2 participantes']
-  }],
+  participants: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Participant'
+    }],
+    validate: {
+      validator: function(arr) {
+        return arr.length === 2;
+      },
+      message: 'Debe tener exactamente 2 participantes'
+    }
+  },
   sets: [setSchema],
   stage: {
     type: String,
@@ -39,4 +49,4 @@ const matchSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Match', matchSchema);
+module.exports = mongoose.model('Match', matchSchema); 

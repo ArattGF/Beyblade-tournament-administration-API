@@ -33,9 +33,11 @@ const GetAllGroups = async (req, res) => {
       {
         $group: {
           _id: '$group',
+          identifier: {$first: '$groupInfo._id'},
           groupName: { $first: '$groupInfo.name' },
           participants: {
             $push: {
+              _id: '$_id',
               name: '$name',
               region: '$region',
               victories: '$victories',
@@ -48,7 +50,7 @@ const GetAllGroups = async (req, res) => {
       },
       {
         $project: {
-          _id: 0,
+          _id: '$identifier',
           name: '$groupName',
           participants: {
             $sortArray: {

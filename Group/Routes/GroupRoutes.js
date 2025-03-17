@@ -8,6 +8,8 @@ app.use(authMiddleware);
 
 app.get('/', GroupController.getAllGroups );
 
+// app.get('/', GroupController.getAllGroups );
+
 app.post('/create', GroupController.createGroup);
 
 

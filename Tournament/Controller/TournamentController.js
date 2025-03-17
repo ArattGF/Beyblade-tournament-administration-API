@@ -40,10 +40,37 @@ const GetCurrentTournament = async (req, res) => {
 
 };
 
+const ChangePhase = async (req, res) =>{
+  try{
+    const { tournamentID } = req.body;
+    const phase = req.query.stage;
+ 
+    const existingTournament = await Tournament.findById(tournamentID);
+    
+    if (!existingTournament) {
+    
+      return res.status(409).send({ok: false, message: 'No existe el torneo', tournamentID: null});
+
+    }
+
+    existingTournament.status = phase;
+
+    existingTournament.save()
+      
+    res.status(200).send({ok: true, message: `Torneo ${existingTournament.name} ha avanzado de fase`, tournament: existingTournament});
+    
+  }catch(error){
+    
+    console.error(error);
+    res.status(500).send('Error al cambiar de fase');
+  }
+}
+
 
 
 
 module.exports = {
   createTournament: CreateTournament,
-  getCurrentTournament:  GetCurrentTournament
+  getCurrentTournament:  GetCurrentTournament,
+  changePhase: ChangePhase
 };

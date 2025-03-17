@@ -10,10 +10,7 @@ app.get('/', TournamentController.getCurrentTournament );
  
 app.post('/create', TournamentController.createTournament);
 
-app.put('/update/:id', (req, res) => {
-    // Logic to update a resource
-    res.send(`Resource with id ${req.params.id} updated`);
-});
+app.post('/start', TournamentController.changePhase);
 
 app.delete('/delete/:id', (req, res) => {
     // Logic to delete a resource
