@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 // Cors para llamadas a la API
 app.use(cors(
   {
-    origin: [env.DEBUG ? env.FRONT_URL_DEBUG : env.FRONT_URL_RELEASE]
+    origin: [ env.FRONT_URL_DEBUG,env.FRONT_URL_RELEASE]
   }
 
 ));
