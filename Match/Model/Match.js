@@ -27,7 +27,8 @@ const matchSchema = new mongoose.Schema({
     }],
     validate: {
       validator: function(arr) {
-        return arr.length === 2;
+        return this.stage !== 'group' || arr.length === 2;
+
       },
       message: 'Debe tener exactamente 2 participantes'
     }
@@ -35,17 +36,26 @@ const matchSchema = new mongoose.Schema({
   sets: [setSchema],
   stage: {
     type: String,
-    enum: ['group', 'semifinal', 'final', 'consolation'],
+    enum: ['group', 'finals','semifinal', 'final', 'consolation'],
     required: true
   },
   status: {
     type: String,
-    enum: ['scheduled', 'ongoing', 'completed'],
+            
+    enum: ['scheduled', 'pending', 'ongoing', 'completed'],
     default: 'scheduled'
   },
   winner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Participant'
+  },
+  previousMatches: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Match'
+  }],
+  nextMatchId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Match'
   }
 });
 

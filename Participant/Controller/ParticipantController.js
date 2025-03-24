@@ -112,8 +112,47 @@ const CreateParticipant = async (req, res) => {
 }
 
 
+GetGroupWinners = async (req, res) => {
+  try {
+    const {tournamentId} = req.query;
+
+    const groupWinners = await Participant.aggregate([
+      {
+        $match: {
+          tournament: new mongoose.Types.ObjectId(tournamentId),
+          group: { $exists: true, $ne: null }
+        }
+      },
+      {
+        $sort: {
+          group: -1, // Ordenar por grupo primero
+          victories: -1,
+          totalSets: -1,
+          groupPoints: -1
+        }
+      },
+      {
+        $group: {
+          _id: "$group",
+          topParticipant: { $first: "$$ROOT" }
+        }
+      },
+      {
+        $replaceRoot: { newRoot: "$topParticipant" }
+      }
+    ]);
+    
+    res.status(200).json({ok: true, groups: groupWinners});
+  } catch (error) {
+    console.log(error);
+    
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllParticipants: GetParticipants,
-  createParticipant: CreateParticipant
+  createParticipant: CreateParticipant,
+  getGroupWinners: GetGroupWinners
 
 }

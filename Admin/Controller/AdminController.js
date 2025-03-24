@@ -19,13 +19,13 @@ exports.signInUser = async (req, res) => {
     const users = await Admin.findOne({user});
 
     if (!users) {
-      return res.status(401).send('Invalid credentials');
+      return res.status(400).send({message: 'Invalid credentials'});
     } 
      
     let isMatch = await bcrypt.compare(passwd, users.password);
 
     if (!isMatch) {
-      return res.status(401).send('Invalid credentials');
+      return res.status(400).send({message: 'Invalid credentials'});
       
     }
     // Eliminar el campo password de cada usuario

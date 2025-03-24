@@ -1,29 +1,42 @@
 const Group = require('../Model/Group');
 const Tournament = require('../../Tournament/Model/Tournament');
 const Participant= require('../../Participant/Model/Participant');
+const Match = require('../../Match/Model/Match')
 
 const getAlphabeticArray = require('../utils/AlphabeticNumeration');
 
 const GetAllGroups = async (req, res) => {
   try {
-    // 1. Buscar el torneo activo
-    const tournament = await Tournament.findOne({ status: { $ne: 'completed' } });
-    
+    // 1. Buscar primero torneo activo (no completado)
+    let tournament = await Tournament.findOne({ status: { $ne: 'completed' } });
+
+    // Si no hay activo, buscar el último torneo completado
     if (!tournament) {
-      return res.status(204).send({ ok: true, message: 'No hay torneo en curso', groups: [] });
+      tournament = await Tournament.findOne({ status: 'completed' })
+        .sort({ _id: -1 }); // Ordenar por ID descendente para obtener el más reciente
     }
+
+    // Si no hay ningún torneo en absoluto
+    if (!tournament) {
+      return res.status(204).send({ 
+        ok: true, 
+        message: 'No hay torneos existentes', 
+        groups: [] 
+      });
+    }
+
 
     // 2. Agregación para obtener grupos con participantes ordenados
     const groups = await Participant.aggregate([
       {
         $match: {
           tournament: tournament._id,
-          group: { $exists: true, $ne: null } // Solo participantes con grupo asignado
+          group: { $exists: true, $ne: null }
         }
       },
       {
         $lookup: {
-          from: 'groups', // Nombre de la colección de grupos
+          from: 'groups',
           localField: 'group',
           foreignField: '_id',
           as: 'groupInfo'
@@ -33,7 +46,7 @@ const GetAllGroups = async (req, res) => {
       {
         $group: {
           _id: '$group',
-          identifier: {$first: '$groupInfo._id'},
+          identifier: { $first: '$groupInfo._id' },
           groupName: { $first: '$groupInfo.name' },
           participants: {
             $push: {
@@ -65,13 +78,10 @@ const GetAllGroups = async (req, res) => {
         }
       },
       {
-        $sort: {
-          name: 1 // 1 = orden ascendente (A-Z)
-        }
+        $sort: { name: 1 }
       }
     ]);
 
-    // 3. Si no hay grupos con participantes
     if (groups.length === 0) {
       return res.status(204).send({ 
         ok: true, 
@@ -80,12 +90,61 @@ const GetAllGroups = async (req, res) => {
       });
     }
 
-    // 4. Respuesta exitosa
+    // 3. Verificar etapa de grupos completada para cada grupo
+    const groupsWithStatus = await Promise.all(groups.map(async (group) => {
+      const participantCount = group.participants.length;
+      let groupStageEnded = false;
+
+      if (participantCount >= 2) {
+        const requiredMatches = (participantCount * (participantCount - 1)) / 2;
+
+        // Agregación para contar enfrentamientos únicos completados
+        const uniqueMatchesCount = await Match.aggregate([
+          {
+            $match: {
+              group: group._id,
+              status: 'completed'
+            }
+          },
+          {
+            $project: {
+              sortedParticipants: {
+                $sortArray: {
+                  input: "$participants",
+                  sortBy: { _id: 1 }
+                }
+              }
+            }
+          },
+          {
+            $group: {
+              _id: "$sortedParticipants",
+              count: { $sum: 1 }
+            }
+          },
+          {
+            $count: "totalUniqueMatches"
+          }
+        ]);
+
+        const completedMatches = uniqueMatchesCount[0]?.totalUniqueMatches || 0;
+        groupStageEnded = completedMatches >= requiredMatches;
+      }
+
+      return {
+        ...group,
+        groupStageEnded
+      };
+    }));
     res.status(200).send({
       ok: true,
-      message: 'Datos de grupos obtenidos',
-      groups: groups,
-      tournamentName: tournament.name
+      message: tournament.status === 'completed' 
+        ? 'Datos de grupos del último torneo completado' 
+        : 'Datos de grupos del torneo en curso',
+      groups: groupsWithStatus,
+      tournamentName: tournament.name,
+      tournamentId: tournament._id,
+      tournamentStage: tournament.status
     });
 
   } catch (error) {

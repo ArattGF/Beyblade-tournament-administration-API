@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Group = require('../../Group/Model/Group')
 
 const tournamentSchema = new mongoose.Schema({
   name: { 
@@ -15,12 +16,12 @@ const tournamentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['created', 'registration', 'group', 'finals', 'completed'],
+    enum: ['created', 'registration', 'group', 'finals', 'semifinal', 'final', 'completed'],
     default: 'created'
   },
   groups: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'groups'
+    ref: 'Group'
   }],
   finalsBracket:  {
     rounds: [{
@@ -38,7 +39,7 @@ const tournamentSchema = new mongoose.Schema({
         winner: { type: mongoose.Schema.Types.ObjectId, ref: 'Participant' },
         status: { 
           type: String, 
-          enum: ['pending', 'ongoing', 'completed'] 
+          enum: [ 'scheduled','pending', 'ongoing', 'completed'] 
         }
       }]
     }]

@@ -34,14 +34,29 @@ const participantSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  position: Number
+  seed: {
+    type: Number,
+    default: 0
+  },
+  isBye: {  // Nuevo campo para identificar BYEs
+    type: Boolean,
+    default: false
+  },
+  position: Number,
 });
 
+// Índice parcial para unique name solo cuando no es BYE
+participantSchema.index(
+  { name: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      isBye: { $ne: true }
+    }
+  }
+);
 // Virtuals para cálculos dinámicos
 participantSchema.virtual('totalPoints').get(function() {
   return this.groupPoints + this.elimPoints;
 });
-
-participantSchema.index({name: 1}, {unique: true});
-
 module.exports = mongoose.model('Participant', participantSchema);

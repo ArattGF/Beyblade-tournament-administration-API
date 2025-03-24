@@ -12,9 +12,5 @@ app.post('/create', TournamentController.createTournament);
 
 app.post('/start', TournamentController.changePhase);
 
-app.delete('/delete/:id', (req, res) => {
-    // Logic to delete a resource
-    res.send(`Resource with id ${req.params.id} deleted`);
-});
 
 module.exports = app;

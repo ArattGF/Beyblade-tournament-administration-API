@@ -10,6 +10,7 @@ app.use(authMiddleware);
 
 
 app.get('/', ParticipantController.getAllParticipants);
+app.get('/winners', ParticipantController.getGroupWinners);
 
 app.post('/create', ParticipantController.createParticipant);
 
