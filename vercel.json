@@ -21,17 +21,5 @@
     "FRONT_URL_DEBUG": "$FRONT_URL_DEBUG",
     "FRONT_URL_RELEASE": "$FRONT_URL_RELEASE",
     "DEBUG": "$DEBUG"
-  },
-  "rewrites": [
-    {
-      "source": "/socket.io/(.*)",
-      "destination": "/api",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://hidrobladers.vercel.app",
-        "Access-Control-Allow-Methods": "GET, POST",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true"
-      }
-    }
-  ]
+  }
 }
