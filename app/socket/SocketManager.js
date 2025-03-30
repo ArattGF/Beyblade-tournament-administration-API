@@ -28,13 +28,16 @@ class SocketManager {
       cors: {
         origin: [env.FRONT_URL_DEBUG , env.FRONT_URL_RELEASE],
         methods: ["GET", "POST"],
+        credentials: true,
       },
     });
+
 
     this.setupConnection();
   }
 
   setupConnection() {
+    console.log('CORS Origins:', env.FRONT_URL_DEBUG, env.FRONT_URL_RELEASE);
     this.io.on('connection', (socket) => {
       console.log('Cliente conectado:', socket.id);
       socket.on('disconnect', () => {
