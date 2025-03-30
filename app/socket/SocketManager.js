@@ -26,9 +26,10 @@ class SocketManager {
     // Configuración original del servidor Socket.io
     this.io = new Server(server, {
       cors: {
-        origin: [env.FRONT_URL_DEBUG , env.FRONT_URL_RELEASE],
+        origin: '*',
         methods: ["GET", "POST"],
         credentials: true,
+        allowedHeaders: ["Content-Type", "Authorization"]
       },
     });
 
