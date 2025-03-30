@@ -5,11 +5,11 @@ const app = Router();
 const MatchControler = require('../Controller/MatchControler')
 const authMiddleware = require('../../app/middleware/AuthMiddleware');
 
-app.use(authMiddleware);
 
-app.get('/', MatchControler.getMatchDetails);
 
-app.get('/finals', async (req, res) => {
+app.get('/',authMiddleware, MatchControler.getMatchDetails);
+
+app.get('/finals', authMiddleware,async (req, res) => {
   try {
     const matchDetails = await MatchControler.getMatchDetailsForFinals(req.query.matchId);
     res.status(200).json(matchDetails);
@@ -18,7 +18,7 @@ app.get('/finals', async (req, res) => {
   }
 });
 
-app.get('/top-4', async (req, res) => {
+app.get('/top-4',authMiddleware, async (req, res) => {
   try {
     const top4 = await MatchControler.getTop4(req.query.tournamentId);
     res.status(200).json(top4);
@@ -29,7 +29,7 @@ app.get('/top-4', async (req, res) => {
 
 
 
-app.get('/participants-availables', MatchControler.getAvailableParticipants);
+app.get('/participants-availables',authMiddleware, MatchControler.getAvailableParticipants);
 
 
 app.post('/start', MatchControler.startNewMatch);
@@ -39,7 +39,7 @@ app.put('/end-set', MatchControler.addSetToMatch);
 app.put('/finals/end-set', MatchControler.addSetToFinalMatch);
 
 
-app.post('/:id/initialize', async (req, res) => {
+app.post('/:id/initialize',authMiddleware, async (req, res) => {
   try {
     const tournament = await MatchControler.initializeFinalsBracket(req.params.id);
     res.status(200).json(tournament);
@@ -50,7 +50,7 @@ app.post('/:id/initialize', async (req, res) => {
   }
 });
 
-app.put('/:tournamentId/matches/:matchId', async (req, res) => {
+app.put('/:tournamentId/matches/:matchId',authMiddleware, async (req, res) => {
   try {
     const tournament = await MatchControler.updateBracketMatch(
       req.params.tournamentId,

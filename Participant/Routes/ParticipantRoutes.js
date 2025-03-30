@@ -6,12 +6,11 @@ const authMiddleware = require('../../app/middleware/AuthMiddleware');
 app = Router();
 
 
-app.use(authMiddleware);
 
-
-app.get('/', ParticipantController.getAllParticipants);
 app.get('/winners', ParticipantController.getGroupWinners);
 
-app.post('/create', ParticipantController.createParticipant);
+app.get('/',authMiddleware, ParticipantController.getAllParticipants);
+
+app.post('/create',authMiddleware, ParticipantController.createParticipant);
 
 module.exports = app; 
