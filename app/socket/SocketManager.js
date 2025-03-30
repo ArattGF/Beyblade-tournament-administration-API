@@ -26,8 +26,23 @@ class SocketManager {
     // Configuración original del servidor Socket.io
     this.io = new Server(server, {
       cors: {
-        origin: '*'
+        origin: [
+          env.FRONT_URL_DEBUG,
+          env.FRONT_URL_RELEASE,
+          "https://hidrobladers.vercel.app" // Añade explícitamente este dominio
+        ],
+        methods: ["GET", "POST"],
+        credentials: true,
+        allowedHeaders: ["Content-Type", "Authorization"],
+        exposedHeaders: ["Content-Type", "Authorization"]
       },
+      transports: ['websocket', 'polling'],
+      allowEIO3: true, // Compatibilidad temporal
+      path: "/socket.io/",
+      cookie: {
+        secure: true,
+        sameSite: "none"
+      }
     });
 
 

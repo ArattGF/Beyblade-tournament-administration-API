@@ -17,6 +17,44 @@
     "MONGODB_DB": "$MONGODB_DB",
     "PORT": "$PORT",
     "JWT_SECRET": "$JWT_SECRET",
-    "JWT_EXPIRES_IN" : "$JWT_EXPIRES_IN"
-  }
+    "JWT_EXPIRES_IN": "$JWT_EXPIRES_IN",
+    "FRONT_URL_DEBUG": "$FRONT_URL_DEBUG",
+    "FRONT_URL_RELEASE": "$FRONT_URL_RELEASE",
+    "DEBUG": "$DEBUG"
+  },
+  "rewrites": [
+    {
+      "source": "/socket.io/(.*)",
+      "destination": "/api",
+      "headers": {
+        "Access-Control-Allow-Origin": "https://hidrobladers.vercel.app",
+        "Access-Control-Allow-Methods": "GET, POST",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Credentials": "true"
+      }
+    }
+  ],
+  "headers": [
+    {
+      "source": "/socket.io/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://hidrobladers.vercel.app"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ]
 }
