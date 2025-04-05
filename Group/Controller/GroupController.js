@@ -69,9 +69,9 @@ const GetAllGroups = async (req, res) => {
             $sortArray: {
               input: '$participants',
               sortBy: {
-                totalPoints: -1,
                 victories: -1,
-                sets: -1
+                sets: -1,
+                totalPoints: -1
               }
             }
           }

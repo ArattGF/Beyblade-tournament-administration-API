@@ -26,31 +26,14 @@ class SocketManager {
     // Configuración original del servidor Socket.io
     this.io = new Server(server, {
       cors: {
-        origin: [
-          env.FRONT_URL_DEBUG,
-          env.FRONT_URL_RELEASE,
-          "https://hidrobladers.vercel.app" // Añade explícitamente este dominio
-        ],
-        methods: ["GET", "POST"],
-        credentials: true,
-        allowedHeaders: ["Content-Type", "Authorization"],
-        exposedHeaders: ["Content-Type", "Authorization"]
+        origin: '*'
       },
-      transports: ['websocket', 'polling'],
-      allowEIO3: true, // Compatibilidad temporal
-      path: "/socket.io/",
-      cookie: {
-        secure: true,
-        sameSite: "none"
-      }
     });
-
 
     this.setupConnection();
   }
 
   setupConnection() {
-    console.log('CORS Origins:', env.FRONT_URL_DEBUG, env.FRONT_URL_RELEASE);
     this.io.on('connection', (socket) => {
       console.log('Cliente conectado:', socket.id);
       socket.on('disconnect', () => {

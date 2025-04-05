@@ -46,12 +46,13 @@ const participantSchema = new mongoose.Schema({
 });
 
 // Índice parcial para unique name solo cuando no es BYE
+
 participantSchema.index(
-  { name: 1 },
+  { tournament: 1, name: 1 }, // Considera la combinación torneo + nombre
   {
     unique: true,
     partialFilterExpression: {
-      isBye: { $ne: true }
+      isBye: { $ne: true } // Aplica la unicidad solo si no es un BYE
     }
   }
 );

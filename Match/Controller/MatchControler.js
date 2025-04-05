@@ -301,7 +301,6 @@ AddSetToMatch = async (req, res) => {
     }
 
 
-    match.status = 'ongoing';
 
 
     // Guardar cambios y commit
