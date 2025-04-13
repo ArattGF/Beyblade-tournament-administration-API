@@ -51,9 +51,7 @@ participantSchema.index(
   { tournament: 1, name: 1 }, // Considera la combinación torneo + nombre
   {
     unique: true,
-    partialFilterExpression: {
-      isBye: { $ne: true } // Aplica la unicidad solo si no es un BYE
-    }
+    partialFilterExpression: { isBye: false  }
   }
 );
 // Virtuals para cálculos dinámicos

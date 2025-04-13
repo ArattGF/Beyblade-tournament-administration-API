@@ -40,7 +40,9 @@ const GetAvailableParticipants = async (req, res) => {
     const existingMatches = await Match.find({
       group: groupId,
       stage: 'group',
-      participants: participantObjectId
+      participants: participantObjectId,
+      status: {$ne: 'ongoing'},
+
     }).select('participants');
 
     // Procesar oponentes
@@ -60,7 +62,9 @@ const GetAvailableParticipants = async (req, res) => {
           ...uniqueOpponents.map(id => new mongoose.Types.ObjectId(id))
         ]
       }
+      
     }).select('name region victories totalPoints');
+
 
     res.status(200).json({
       count: availableParticipants.length,
@@ -85,9 +89,6 @@ const StartNewMatch = async (req, res) => {
     const { groupId } = req.query;
     const { participants } = req.body;
 
-
-
-    // Validaciones básicas
     if (!Array.isArray(participants) || participants.length !== 2) {
       await session.abortTransaction();
       return res.status(400).json({ message: 'Debe proporcionar exactamente 2 participantes' });
@@ -96,9 +97,6 @@ const StartNewMatch = async (req, res) => {
     const [participant1Id, participant2Id] = participants.map(id => new mongoose.Types.ObjectId(id));
     const groupObjectId = new mongoose.Types.ObjectId(groupId);
 
-
-
-    // Obtener y validar grupo
     const group = await Group.findById(groupObjectId)
       .populate('tournament', 'name')
       .populate('participants', 'name')
@@ -109,7 +107,6 @@ const StartNewMatch = async (req, res) => {
       return res.status(404).json({ message: 'Grupo no encontrado' });
     }
 
-    // Validar participantes
     const participantsInGroup = await Participant.find({
       _id: { $in: [participant1Id, participant2Id] },
       group: groupObjectId
@@ -126,7 +123,21 @@ const StartNewMatch = async (req, res) => {
       });
     }
 
-    // Crear y guardar nuevo match
+    // Verificar si ya existe un match en curso con estos participantes
+    const existingMatch = await Match.findOne({
+      group: groupObjectId,
+      participants: { $all: [participant1Id, participant2Id] },
+      status: 'ongoing'
+    }).session(session);
+
+    if (existingMatch) {
+      await session.commitTransaction();
+      return res.status(201).json({
+        message: 'Ya existe un match en curso con estos participantes',
+        match: existingMatch._id
+      });
+    }
+
     const newMatch = new Match({
       tournament: group.tournament,
       group: groupObjectId,
@@ -137,15 +148,11 @@ const StartNewMatch = async (req, res) => {
     });
 
     await newMatch.save({ session });
-
-    // Actualizar grupo con nuevo match
     group.matches.push(newMatch._id);
     await group.save({ session });
     await session.commitTransaction();
 
-
-
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Match creado exitosamente',
       match: newMatch._id
     });
@@ -448,6 +455,8 @@ const InitializeFinalsBracket = async (tournamentId) => {
       { new: true, session }
     );
 
+    console.log("Torneo")
+    console.log(tournament);
     // 2. Obtener y ordenar ganadores de grupos
     const groups = await Group.find({ tournament: tournamentId })
       .populate({
@@ -464,11 +473,16 @@ const InitializeFinalsBracket = async (tournamentId) => {
     const totalParticipants = sortedWinners.length;
     const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(totalParticipants)));
     const byesNeeded = nextPowerOfTwo - totalParticipants;
+    const totalRounds = Math.log2(nextPowerOfTwo);
+    const initialStage = getStageFromRound(1, totalRounds); // Usar totalRounds calculado
+
 
     const participantsWithByes = sortedWinners.map((winner, index) => ({
       participant: winner,
       hasBye: index < byesNeeded
     }));
+
+
 
 
     // 7. Función de avance para BYEs
@@ -518,7 +532,7 @@ const InitializeFinalsBracket = async (tournamentId) => {
 
         const byeMatch = new Match({
           tournament: tournamentId,
-          stage: 'finals',
+          stage: initialStage, // Usar etapa calculada
           participants: [participant, bye],
           status: 'completed',
           winner: participant._id,
@@ -534,7 +548,7 @@ const InitializeFinalsBracket = async (tournamentId) => {
           const opponent = participantsWithByes[participantsWithByes.length - 1 - (i - byesNeeded)];
           const match = new Match({
             tournament: tournamentId,
-            stage: 'finals',
+            stage: initialStage, // Usar etapa calculada
             participants: [participant, opponent.participant],
             status: 'scheduled',
             nextMatchId: null
@@ -568,7 +582,7 @@ const InitializeFinalsBracket = async (tournamentId) => {
           matches[i + 1] ? Match.findById(matches[i + 1]._id).session(session) : null
         ]);
 
-        const stage = getStageFromRound(roundNumber);
+        const stage = getStageFromRound(roundNumber, totalRounds);
         const isFinal = stage === 'final';
 
         // Buscar match existente con lógica mejorada
@@ -621,7 +635,9 @@ const InitializeFinalsBracket = async (tournamentId) => {
         }
       }
 
-      if (nextMatches.length > 0 && getStageFromRound(roundNumber) !== 'final') {
+      if (nextMatches.length > 0 && getStageFromRound(roundNumber, totalRounds) !== 'final') {
+      console.log(nextMatches.length)
+      console.log(getStageFromRound(roundNumber))
         await generateNextRounds(nextMatches, roundNumber + 1);
       }
     };
@@ -641,7 +657,16 @@ const InitializeFinalsBracket = async (tournamentId) => {
 
     await session.commitTransaction();
 
-    return GetBracketStructure(tournamentId); // Usar función existente
+
+    let bracketStructure = GetBracketStructure(tournamentId);
+
+
+    Socket.io.emit('initialize-bracket', { 
+      tournamentId: tournamentId,
+      bracket: bracketStructure 
+    });
+
+    return bracketStructure ; // Usar función existente
 
   } catch (error) {
     await session.abortTransaction();
@@ -651,13 +676,9 @@ const InitializeFinalsBracket = async (tournamentId) => {
   }
 };
 // Función auxiliar para determinar rondas
-function getStageFromRound(round) {
-  const stageMap = {
-    1: 'finals',
-    2: 'semifinal',
-    3: 'final'
-  };
-  return stageMap[round] || 'final';
+function getStageFromRound(round, totalRounds) {
+  const stageOrder = ['final', 'semifinal', 'quarterfinal'];
+  return stageOrder[totalRounds - round] || `finals`;
 }
 
 
@@ -929,20 +950,25 @@ const AddSetToFinalMatch = async (req, res) => {
       // Avanzar al ganador a la siguiente ronda
       const advanceResult = await AdvanceWinnerToNextRound(match._id, matchWinner, session);
 
-      // Emitir actualización por socket
-      Socket.io.emit('update-final-match', {
-        matchId: match._id,
-        winnerId: matchWinner,
-        ...advanceResult
-      });
     } else {
       match.status = 'ongoing';
     }
-
+    
     // Guardar cambios y commit
     await match.save({ session });
     await session.commitTransaction();
     transactionStarted = false;
+    
+    
+    if (matchWinner) {
+      const bracketStructure = await GetBracketStructure(match.tournament.toString());
+      
+          Socket.io.emit('update-bracket', { 
+            tournamentId: match.tournament,
+            bracket: bracketStructure 
+          });
+
+    }
 
     // Preparar respuesta
     const response = {

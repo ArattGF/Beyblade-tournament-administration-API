@@ -77,7 +77,7 @@ const CreateParticipant = async (req, res) => {
 
     const { name, region, tournamentID } = req.body;
 
-    participant = await Participant.findOne({ name: name });
+    participant = await Participant.findOne({ name: name,  tournament: tournamentID});
 
     if (participant) {
       res.status(409).send('Ya existe un participante con ese nombre');
